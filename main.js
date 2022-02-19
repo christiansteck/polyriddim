@@ -28,8 +28,10 @@ let audioContext = undefined
 const state = {
   x: 7,
   y: 11,
-  bpm: 120,
+  bpm: 80,
+
   currentNote: undefined,
+  noteToBeScheduled: undefined, // next note to be scheduled, number in range [0, x*y)
 
   nextNoteTime: undefined, // time when next note is to be played
 
@@ -90,15 +92,36 @@ const renderLabel = () => {
 const scheduleNotes = () => {
   while (state.nextNoteTime < audioContext.currentTime + SCHEDULE_AHEAD_TIME) {
 
-    const osc = audioContext.createOscillator();
-    osc.connect(audioContext.destination);
-    osc.frequency.value = 880.0;
 
-    osc.start(state.nextNoteTime)
-    osc.stop(state.nextNoteTime + NOTE_LENGTH)
+    if (state.noteToBeScheduled % state.x === 0) {
+      const osc = audioContext.createOscillator();
+      osc.connect(audioContext.destination);
+      osc.frequency.value = 880.0
 
-    const secondsPerBeat = 60.0 / state.bpm
-    state.nextNoteTime += 0.25 * secondsPerBeat
+      osc.start(state.nextNoteTime)
+      osc.stop(state.nextNoteTime + NOTE_LENGTH)
+    }
+    if (state.noteToBeScheduled % state.y === 0) {
+      const osc = audioContext.createOscillator();
+      osc.connect(audioContext.destination);
+      osc.frequency.value = 440.0
+
+      osc.start(state.nextNoteTime)
+      osc.stop(state.nextNoteTime + NOTE_LENGTH)
+    }
+    // if (state.noteToBeScheduled % state.x !== 0 && state.noteToBeScheduled % state.y !== 0) {
+    //   const osc = audioContext.createOscillator();
+    //   osc.connect(audioContext.destination);
+    //   osc.frequency.value = 220.0
+    //
+    //   osc.start(state.nextNoteTime)
+    //   osc.stop(state.nextNoteTime + NOTE_LENGTH)
+    // }
+
+    const secondsPerBeat = 60.0 / state.bpm / state.x
+    state.nextNoteTime += secondsPerBeat
+
+    state.noteToBeScheduled = (state.noteToBeScheduled + 1) % (state.x * state.y)
   }
 }
 
@@ -117,7 +140,8 @@ const start = () => {
     node.start(0);
   }
   if (state.intervalID) return
-  state.nextNoteTime = audioContext.currentTime
+  state.nextNoteTime = audioContext.currentTime + SCHEDULE_AHEAD_TIME
+  state.noteToBeScheduled = 0
 
   state.intervalID = setInterval(() => {
     scheduleNotes()
@@ -144,10 +168,22 @@ const stop = () => {
 // Initialization
 // *********************************************************************************************************************
 const init = () => {
-  incXBtn.addEventListener('click', changeSignature('x', 1))
-  decXBtn.addEventListener('click', changeSignature('x', -1))
-  incYBtn.addEventListener('click', changeSignature('y', 1))
-  decYBtn.addEventListener('click', changeSignature('y', -1))
+  incXBtn.addEventListener('click', () => {
+    changeSignature('x', 1)();
+    stop()
+  })
+  decXBtn.addEventListener('click', () => {
+    changeSignature('x', -1)();
+    stop()
+  })
+  incYBtn.addEventListener('click', () => {
+    changeSignature('y', 1)();
+    stop()
+  })
+  decYBtn.addEventListener('click', () => {
+    changeSignature('y', -1)();
+    stop()
+  })
   playBtn.addEventListener('click', start)
   pauseBtn.addEventListener('click', pause)
   stopBtn.addEventListener('click', stop)
