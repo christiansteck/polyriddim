@@ -1,23 +1,50 @@
 <!DOCTYPE html>
+<!--aria labels!-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polyriddim</title>
     <link href="main.css" rel="stylesheet">
 </head>
 <body>
-<div>
+<div class="main">
     <h1>Polyriddim</h1>
-    <button id="inc-x">+</button>
-    <button id="dec-x">-</button>
-    <span id="label"></span>
-    <button id="inc-y">+</button>
-    <button id="dec-y">-</button>
+    <div class="header">
+        <div class="signature-controls">
+            <button id="inc-x">&#x25B2;</button>
+            <button id="dec-x">&#x25BC;</button>
+        </div>
+        <span id="label">3 vs 5</span>
+        <div class="signature-controls">
+            <button id="inc-y">&#x25B2;</button>
+            <button id="dec-y">&#x25BC;</button>
+        </div>
+    </div>
     <div id="grid"></div>
-    <label for="myRange">Tempo</label><input type="range" min="40" max="160" value="50" class="slider" id="myRange">
-    <button id="play">Play</button>
-    <button id="pause">Pause</button>
-    <button id="stop">Stop</button>
+    <div>
+        <button id="play"><span class="play--play">&#x25B6;</span></button>
+    </div>
+    <div id="tempo-controls">
+        <label for="tempo-slider" id="tempo-label">Tempo: 60</label>
+        <input class="slider" id="tempo-slider" max="240" min="30" type="range" value="60">
+    </div>
+    <div class="separator"></div>
+    <div class="settings">
+        <span class="subheader">Settings</span>
+        <div>
+            <input checked id="ones" name="radio-notes" type="radio" value="ones">
+            <label for="ones">Play "ones" only</label>
+        </div>
+        <div>
+            <input id="all" name="radio-notes" type="radio" value="all">
+            <label for="all">Play every note</label>
+        </div>
+        <div>
+            <input id="other" name="radio-notes" type="radio" value="other">
+            <label for="other">Play every other note</label>
+        </div>
+    </div>
 </div>
 
 <script src="main.js" type="module"></script>
