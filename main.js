@@ -1,10 +1,10 @@
 // *********************************************************************************************************************
 // HTMLElements
 // *********************************************************************************************************************
-const incXBtn = document.getElementById("inc-x")
-const decXBtn = document.getElementById("dec-x")
-const incYBtn = document.getElementById("inc-y")
-const decYBtn = document.getElementById("dec-y")
+const incXBtn = document.getElementById("inc-pulse")
+const decXBtn = document.getElementById("dec-pulse")
+const incYBtn = document.getElementById("inc-conterpulse")
+const decYBtn = document.getElementById("dec-conterpulse")
 const playBtn = document.getElementById("play")
 const labelElm = document.getElementById('label')
 const gridElm = document.getElementById('grid')
@@ -23,8 +23,8 @@ const NOTE_OPTIONS = ['ONES', 'ALL', 'OTHER']
 // State
 // *********************************************************************************************************************
 const state = {
-  x: 3,
-  y: 5,
+  pulse: 3,
+  counterpulse: 5,
   bpm: 60,
 
   noteToBeScheduled: undefined, // next note to be scheduled, number in range [0, x*y)
@@ -67,27 +67,27 @@ window.requestAnimFrame = (function () {
 // Grid
 // *********************************************************************************************************************
 const renderGrid = () => {
-  gridElm.style.gridTemplateColumns = Array(state.x).fill("minmax(5px, 50px)").join(' ')
-  gridElm.style.gridTemplateRows = Array(state.y).fill("minmax(5px, 50px)").join(' ')
+  gridElm.style.gridTemplateColumns = Array(state.pulse).fill("minmax(5px, 50px)").join(' ')
+  gridElm.style.gridTemplateRows = Array(state.counterpulse).fill("minmax(5px, 50px)").join(' ')
 
   gridElm.textContent = ''
 
-  for (let i = 0; i < state.x * state.y; i++) {
+  for (let i = 0; i < state.pulse * state.counterpulse; i++) {
     const cell = document.createElement("div")
     cell.classList.add('cell');
-    if (i % state.x === 0) {
+    if (i % state.pulse === 0) {
       cell.classList.add('cell--primary')
     }
-    if (i % state.y === 0) {
+    if (i % state.counterpulse === 0) {
       cell.classList.add('cell--secondary')
     }
 
     if (state.noteOption === 'OTHER') {
-      const isIntermediate = (i % state.x) % 2 === 1
-      cell.textContent = isIntermediate ? '&' : `${(i % state.x) / 2 + 1}`
+      const isIntermediate = (i % state.pulse) % 2 === 1
+      cell.textContent = isIntermediate ? '&' : `${(i % state.pulse) / 2 + 1}`
       if (isIntermediate ) cell.classList.add('cell--intermediate')
     } else {
-      cell.textContent = `${i % state.x + 1}`
+      cell.textContent = `${i % state.pulse + 1}`
     }
 
 
@@ -124,24 +124,24 @@ const animateCells = () => {
 // Header
 // *********************************************************************************************************************
 const renderLabel = () => {
-  labelElm.textContent = `${state.x} vs ${state.y}`
+  labelElm.textContent = `${state.pulse} vs ${state.counterpulse}`
 }
 
 const renderSignatureControls = () => {
-  incXBtn.disabled = state.x >= 11
-  incYBtn.disabled = state.y >= 11
-  decXBtn.disabled = state.x <= 2
-  decYBtn.disabled = state.y <= 2
+  incXBtn.disabled = state.pulse >= 11
+  incYBtn.disabled = state.counterpulse >= 11
+  decXBtn.disabled = state.pulse <= 2
+  decYBtn.disabled = state.counterpulse <= 2
 }
 
 // *********************************************************************************************************************
 // Audio
 // *********************************************************************************************************************
 const scheduleIntermediateNote = () => {
-  if (state.noteOption === 'OTHER' && (state.noteToBeScheduled % state.x) % 2 === 1) {
+  if (state.noteOption === 'OTHER' && (state.noteToBeScheduled % state.pulse) % 2 === 1) {
     return
   }
-  if (state.noteToBeScheduled % state.x !== 0 && state.noteToBeScheduled % state.y !== 0) {
+  if (state.noteToBeScheduled % state.pulse !== 0 && state.noteToBeScheduled % state.counterpulse !== 0) {
     const osc = state.audioContext.createOscillator();
     osc.connect(state.audioContext.destination);
     osc.frequency.value = 220.0
@@ -156,7 +156,7 @@ const scheduleNotes = () => {
 
     const newNote = {note: state.noteToBeScheduled, time: state.nextNoteTime, audible: false}
 
-    if (state.noteToBeScheduled % state.x === 0) {
+    if (state.noteToBeScheduled % state.pulse === 0) {
       const osc = state.audioContext.createOscillator();
       osc.connect(state.audioContext.destination);
       osc.frequency.value = 880.0
@@ -166,7 +166,7 @@ const scheduleNotes = () => {
 
       newNote.audible = true
     }
-    if (state.noteToBeScheduled % state.y === 0) {
+    if (state.noteToBeScheduled % state.counterpulse === 0) {
       const osc = state.audioContext.createOscillator();
       osc.connect(state.audioContext.destination);
       osc.frequency.value = 440.0
@@ -182,10 +182,10 @@ const scheduleNotes = () => {
 
     state.scheduledNotes.push(newNote)
 
-    const secondsPerBeat = 60.0 / state.bpm / state.x
+    const secondsPerBeat = 60.0 / state.bpm / state.pulse
     state.nextNoteTime += secondsPerBeat
 
-    state.noteToBeScheduled = (state.noteToBeScheduled + 1) % (state.x * state.y)
+    state.noteToBeScheduled = (state.noteToBeScheduled + 1) % (state.pulse * state.counterpulse)
   }
 }
 
@@ -263,13 +263,13 @@ const init = () => {
   playBtn.addEventListener('click', start)
 
   for (let i = 0; i < radioNoteElms.length; i++) {
-    radioNoteElms[i].addEventListener('click', ev => {
+    radioNoteElms[i].addEventListener('click', () => {
       state.noteOption = NOTE_OPTIONS[i]
       renderGrid()
     })
   }
 
-  tempoSliderElm.addEventListener('input', ev => {
+  tempoSliderElm.addEventListener('input', () => {
     state.bpm = tempoSliderElm.value
     renderTempo()
   })
