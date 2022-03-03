@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Polyriddim</title>
     <link href="main.css" rel="stylesheet">
 </head>
@@ -15,7 +15,7 @@
             <button id="inc-pulse">&#x25B2;</button>
             <button id="dec-pulse">&#x25BC;</button>
         </div>
-        <span id="label">3 vs 5</span>
+        <span id="label">3 vs 4</span>
         <div class="signature-controls">
             <button id="inc-conterpulse">&#x25B2;</button>
             <button id="dec-conterpulse">&#x25BC;</button>
@@ -26,23 +26,28 @@
         <button id="play"><span class="play--play">&#x25B6;</span></button>
     </div>
     <div id="tempo-controls">
-        <label for="tempo-slider" id="tempo-label">Tempo: 60</label>
-        <input class="slider" id="tempo-slider" max="240" min="30" type="range" value="60">
+        <label for="tempo-slider" id="tempo-label">Tempo: 90</label>
+        <input class="slider" id="tempo-slider" max="240" min="30" type="range" value="90">
     </div>
     <div class="separator"></div>
     <div class="settings">
         <span class="subheader">Settings</span>
         <div>
-            <input checked id="ones" name="radio-notes" type="radio" value="ones">
-            <label for="ones">Play pulse only</label>
+            <div class="hint">Choose whether the beep should be played for<br>the pulse only or for every subdivision.
+            </div>
+            <div>
+                <input checked id="pulse" name="radio-notes" type="radio" value="pulse">
+                <label for="pulse">Play pulse only</label>
+            </div>
+            <div>
+                <input id="all" name="radio-notes" type="radio" value="all">
+                <label for="all">Play every subdivision</label>
+            </div>
         </div>
         <div>
-            <input id="all" name="radio-notes" type="radio" value="all">
-            <label for="all">Play every note</label>
-        </div>
-        <div>
-            <input id="other" name="radio-notes" type="radio" value="other">
-            <label for="other">Play "Neely groupings"</label>
+            <div class="hint">To count higher subdivisions it might be<br>convenient to group them.</div>
+            <input id="groupSubdivisions" type="checkbox"/>
+            <label for="groupSubdivisions">Group subdivisions</label>
         </div>
     </div>
 </div>

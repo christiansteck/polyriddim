@@ -1,31 +1,35 @@
 // *********************************************************************************************************************
 // HTMLElements
 // *********************************************************************************************************************
-const incXBtn = document.getElementById("inc-pulse")
-const decXBtn = document.getElementById("dec-pulse")
-const incYBtn = document.getElementById("inc-conterpulse")
-const decYBtn = document.getElementById("dec-conterpulse")
+const incPulseBtn = document.getElementById("inc-pulse")
+const decPulseBtn = document.getElementById("dec-pulse")
+const incCounterpulseBtn = document.getElementById("inc-conterpulse")
+const decCounterpulseBtn = document.getElementById("dec-conterpulse")
 const playBtn = document.getElementById("play")
 const labelElm = document.getElementById('label')
 const gridElm = document.getElementById('grid')
 const tempoLabelElm = document.getElementById('tempo-label')
 const tempoSliderElm = document.getElementById('tempo-slider')
 const radioNoteElms = document.getElementsByName('radio-notes')
+const groupSubdivisionsElm = document.getElementById('groupSubdivisions')
 
 // *********************************************************************************************************************
 // Constants
 // *********************************************************************************************************************
 const NOTE_LENGTH = 0.05 // beep length in seconds
 const SCHEDULE_AHEAD_TIME = 0.25
-const NOTE_OPTIONS = ['ONES', 'ALL', 'OTHER']
+
+const NOTE_OPTION_PULSE = 'PULSE'
+const NOTE_OPTION_ALL = 'ALL'
+const NOTE_OPTIONS = [NOTE_OPTION_PULSE, NOTE_OPTION_ALL]
 
 // *********************************************************************************************************************
 // State
 // *********************************************************************************************************************
 const state = {
   pulse: 3,
-  counterpulse: 5,
-  bpm: 60,
+  counterpulse: 4,
+  bpm: 90,
 
   noteToBeScheduled: undefined, // next note to be scheduled, number in range [0, x*y)
   nextNoteTime: undefined, // time when next note is to be played
@@ -36,7 +40,8 @@ const state = {
   intervalID: undefined, // intervalID of setTimeout which schedules notes
 
   // Settings
-  noteOption: 'ONES',
+  noteOption: NOTE_OPTION_PULSE,
+  groupSubdivisions: false,
 }
 
 const changeSignature = (key, val) => () => {
@@ -67,27 +72,27 @@ window.requestAnimFrame = (function () {
 // Grid
 // *********************************************************************************************************************
 const renderGrid = () => {
-  gridElm.style.gridTemplateColumns = Array(state.pulse).fill("minmax(5px, 50px)").join(' ')
-  gridElm.style.gridTemplateRows = Array(state.counterpulse).fill("minmax(5px, 50px)").join(' ')
+  gridElm.style.gridTemplateRows = Array(state.pulse).fill("minmax(5px, 50px)").join(' ')
+  gridElm.style.gridTemplateColumns = Array(state.counterpulse).fill("minmax(5px, 50px)").join(' ')
 
   gridElm.textContent = ''
 
   for (let i = 0; i < state.pulse * state.counterpulse; i++) {
     const cell = document.createElement("div")
     cell.classList.add('cell');
-    if (i % state.pulse === 0) {
+    if (i % state.counterpulse === 0) {
       cell.classList.add('cell--primary')
     }
-    if (i % state.counterpulse === 0) {
+    if (i % state.pulse === 0) {
       cell.classList.add('cell--secondary')
     }
 
-    if (state.noteOption === 'OTHER') {
-      const isIntermediate = (i % state.pulse) % 2 === 1
-      cell.textContent = isIntermediate ? '&' : `${(i % state.pulse) / 2 + 1}`
+    if (state.groupSubdivisions) {
+      const isIntermediate = (i % state.counterpulse) % 2 === 1
+      cell.textContent = isIntermediate ? '&' : `${(i % state.counterpulse) / 2 + 1}`
       if (isIntermediate ) cell.classList.add('cell--intermediate')
     } else {
-      cell.textContent = `${i % state.pulse + 1}`
+      cell.textContent = `${i % state.counterpulse + 1}`
     }
 
 
@@ -128,17 +133,17 @@ const renderLabel = () => {
 }
 
 const renderSignatureControls = () => {
-  incXBtn.disabled = state.pulse >= 11
-  incYBtn.disabled = state.counterpulse >= 11
-  decXBtn.disabled = state.pulse <= 2
-  decYBtn.disabled = state.counterpulse <= 2
+  incPulseBtn.disabled = state.pulse >= 11
+  incCounterpulseBtn.disabled = state.counterpulse >= 11
+  decPulseBtn.disabled = state.pulse <= 2
+  decCounterpulseBtn.disabled = state.counterpulse <= 2
 }
 
 // *********************************************************************************************************************
 // Audio
 // *********************************************************************************************************************
 const scheduleIntermediateNote = () => {
-  if (state.noteOption === 'OTHER' && (state.noteToBeScheduled % state.pulse) % 2 === 1) {
+  if (state.groupSubdivisions && (state.noteToBeScheduled % state.counterpulse) % 2 === 1) {
     return
   }
   if (state.noteToBeScheduled % state.pulse !== 0 && state.noteToBeScheduled % state.counterpulse !== 0) {
@@ -176,13 +181,13 @@ const scheduleNotes = () => {
 
       newNote.audible = true
     }
-    if (state.noteOption === 'ALL' || state.noteOption === 'OTHER') {
+    if (state.noteOption === NOTE_OPTION_ALL) {
       scheduleIntermediateNote()
     }
 
     state.scheduledNotes.push(newNote)
 
-    const secondsPerBeat = 60.0 / state.bpm / state.pulse
+    const secondsPerBeat = 60.0 / state.bpm / state.counterpulse
     state.nextNoteTime += secondsPerBeat
 
     state.noteToBeScheduled = (state.noteToBeScheduled + 1) % (state.pulse * state.counterpulse)
@@ -244,23 +249,29 @@ const renderPlayBtn = () => {
 // Initialization
 // *********************************************************************************************************************
 const init = () => {
-  incXBtn.addEventListener('click', () => {
-    changeSignature('x', 1)();
+  incPulseBtn.addEventListener('click', () => {
+    changeSignature('pulse', 1)();
     stop()
   })
-  decXBtn.addEventListener('click', () => {
-    changeSignature('x', -1)();
+  decPulseBtn.addEventListener('click', () => {
+    changeSignature('pulse', -1)();
     stop()
   })
-  incYBtn.addEventListener('click', () => {
-    changeSignature('y', 1)();
+  incCounterpulseBtn.addEventListener('click', () => {
+    changeSignature('counterpulse', 1)();
     stop()
   })
-  decYBtn.addEventListener('click', () => {
-    changeSignature('y', -1)();
+  decCounterpulseBtn.addEventListener('click', () => {
+    changeSignature('counterpulse', -1)();
     stop()
   })
+
   playBtn.addEventListener('click', start)
+
+  tempoSliderElm.addEventListener('input', () => {
+    state.bpm = tempoSliderElm.value
+    renderTempo()
+  })
 
   for (let i = 0; i < radioNoteElms.length; i++) {
     radioNoteElms[i].addEventListener('click', () => {
@@ -269,10 +280,11 @@ const init = () => {
     })
   }
 
-  tempoSliderElm.addEventListener('input', () => {
-    state.bpm = tempoSliderElm.value
-    renderTempo()
+  groupSubdivisionsElm.addEventListener('click', ()=> {
+    state.groupSubdivisions = groupSubdivisionsElm.checked
+    renderGrid()
   })
+
 
   renderLabel()
   renderGrid()

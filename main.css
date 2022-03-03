@@ -1,6 +1,14 @@
+:root {
+    --main-bg-color: #1e1e1e;
+    --light-on-dark: #eee;
+
+
+    --dark-on-light: #333;
+}
+
 body {
-    background-color: #1e1e1e;
-    color: #eee;
+    background-color: var(--main-bg-color);
+    color: var(--light-on-dark);
     font-family: sans-serif;
 }
 
@@ -25,6 +33,11 @@ h1 {
     align-items: center;
 }
 
+.hint {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
 .header > * + * {
     margin-left: 12px;
 }
@@ -45,7 +58,7 @@ h1 {
 #grid {
     display: grid;
     gap: 5px 5px;
-    color: #333;
+    color: var(--dark-on-light);
     max-width: 95vw;
 }
 
@@ -96,7 +109,6 @@ h1 {
 
 .subheader {
     width: 300px;
-    margin-bottom: 20px;
 }
 
 #tempo-controls {
@@ -120,8 +132,11 @@ h1 {
 .settings {
     display: flex;
     flex-direction: column;
-    color: #bbb;
     margin-top: 5px;
+}
+
+.settings > * + * {
+    margin-top: 10px;
 }
 
 button {
