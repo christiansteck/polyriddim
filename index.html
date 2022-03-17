@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<!--aria labels!-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Polyriddim</title>
     <link href="main.css" rel="stylesheet">
+    <meta content="#ffd21f" name="theme-color">
+    <link href="/manifest.json" rel="manifest">
 </head>
 <body>
 <div class="main">
@@ -21,7 +22,21 @@
             <button id="dec-conterpulse">&#x25BC;</button>
         </div>
     </div>
-    <div id="grid"></div>
+    <div id="grid"
+         style="grid-template-rows: minmax(5px, 50px) minmax(5px, 50px) minmax(5px, 50px); grid-template-columns: minmax(5px, 50px) minmax(5px, 50px) minmax(5px, 50px) minmax(5px, 50px);">
+        <div class="cell cell--primary cell--secondary">1</div>
+        <div class="cell">2</div>
+        <div class="cell">3</div>
+        <div class="cell cell--secondary">4</div>
+        <div class="cell cell--primary">1</div>
+        <div class="cell">2</div>
+        <div class="cell cell--secondary">3</div>
+        <div class="cell">4</div>
+        <div class="cell cell--primary">1</div>
+        <div class="cell cell--secondary">2</div>
+        <div class="cell">3</div>
+        <div class="cell">4</div>
+    </div>
     <div>
         <button id="play"><span class="play--play">&#x25B6;</span></button>
     </div>
@@ -53,5 +68,10 @@
 </div>
 
 <script src="main.js" type="module"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+  }
+</script>
 </body>
 </html>
