@@ -12,6 +12,7 @@ const tempoLabelElm = document.getElementById('tempo-label')
 const tempoSliderElm = document.getElementById('tempo-slider')
 const radioNoteElms = document.getElementsByName('radio-notes')
 const groupSubdivisionsElm = document.getElementById('groupSubdivisions')
+const countOffElm = document.getElementById('countOff')
 
 // *********************************************************************************************************************
 // Constants
@@ -31,17 +32,19 @@ const state = {
   counterpulse: 4,
   bpm: 90,
 
-  noteToBeScheduled: undefined, // next note to be scheduled, number in range [0, x*y)
-  nextNoteTime: undefined, // time when next note is to be played
-  scheduledNotes: [], // {note: number in range [0, x*y), time: number, audible: bool}
+  noteToBeScheduled: null, // next note to be scheduled, number in range [0, x*y)
+  nextNoteTime: null, // time when next note is to be played
+  scheduledNotes: [], // {note: number in range [0, x*y), time: number, animated: bool}
   currentNote: 0, // number in range [0, x*y)
+  countOffNotes: 0, // number of count-off notes still to be played (disables animation of notes)
 
-  audioContext: undefined,
-  intervalID: undefined, // intervalID of setTimeout which schedules notes
+  audioContext: null,
+  intervalID: null, // intervalID of setTimeout which schedules notes
 
   // Settings
   noteOption: NOTE_OPTION_PULSE,
   groupSubdivisions: false,
+  countOff: true,
 }
 
 const changeSignature = (key, val) => () => {
@@ -90,7 +93,7 @@ const renderGrid = () => {
     if (state.groupSubdivisions) {
       const isIntermediate = (i % state.counterpulse) % 2 === 1
       cell.textContent = isIntermediate ? '&' : `${(i % state.counterpulse) / 2 + 1}`
-      if (isIntermediate ) cell.classList.add('cell--intermediate')
+      if (isIntermediate) cell.classList.add('cell--intermediate')
     } else {
       cell.textContent = `${i % state.counterpulse + 1}`
     }
@@ -114,13 +117,15 @@ const animateCells = () => {
   }
 
   const currentTime = state.audioContext.currentTime
+  let highlight = false
 
   while (state.scheduledNotes.length && state.scheduledNotes[0].time < currentTime) {
     state.currentNote = state.scheduledNotes[0].note
+    highlight = state.scheduledNotes[0].animated
     state.scheduledNotes.shift()
   }
 
-  highlightCell()
+  highlight && highlightCell()
 
   window.requestAnimFrame(animateCells)
 }
@@ -142,11 +147,11 @@ const renderSignatureControls = () => {
 // *********************************************************************************************************************
 // Audio
 // *********************************************************************************************************************
-const scheduleIntermediateNote = () => {
+const scheduleIntermediateNote = (countOff) => {
   if (state.groupSubdivisions && (state.noteToBeScheduled % state.counterpulse) % 2 === 1) {
     return
   }
-  if (state.noteToBeScheduled % state.pulse !== 0 && state.noteToBeScheduled % state.counterpulse !== 0) {
+  if ((state.noteToBeScheduled % state.pulse !== 0 || countOff) && state.noteToBeScheduled % state.counterpulse !== 0) {
     const osc = state.audioContext.createOscillator();
     osc.connect(state.audioContext.destination);
     osc.frequency.value = 220.0
@@ -159,17 +164,22 @@ const scheduleIntermediateNote = () => {
 const scheduleNotes = () => {
   while (state.nextNoteTime < state.audioContext.currentTime + SCHEDULE_AHEAD_TIME) {
 
-    const newNote = {note: state.noteToBeScheduled, time: state.nextNoteTime, audible: false}
+    const newNote = {note: state.noteToBeScheduled, time: state.nextNoteTime, animated: true}
+    let countOff = false
 
-    if (state.noteToBeScheduled % state.pulse === 0) {
+    if (state.countOffNotes > 0) {
+      countOff = true
+      newNote.animated = false
+      state.countOffNotes--
+    }
+
+    if (state.noteToBeScheduled % state.pulse === 0 && !countOff) {
       const osc = state.audioContext.createOscillator();
       osc.connect(state.audioContext.destination);
       osc.frequency.value = 880.0
 
       osc.start(state.nextNoteTime)
       osc.stop(state.nextNoteTime + NOTE_LENGTH)
-
-      newNote.audible = true
     }
     if (state.noteToBeScheduled % state.counterpulse === 0) {
       const osc = state.audioContext.createOscillator();
@@ -178,11 +188,9 @@ const scheduleNotes = () => {
 
       osc.start(state.nextNoteTime)
       osc.stop(state.nextNoteTime + NOTE_LENGTH)
-
-      newNote.audible = true
     }
     if (state.noteOption === NOTE_OPTION_ALL) {
-      scheduleIntermediateNote()
+      scheduleIntermediateNote(countOff)
     }
 
     state.scheduledNotes.push(newNote)
@@ -219,6 +227,12 @@ const start = () => {
     state.scheduledNotes = []
     state.currentNote = 0
 
+    if (state.countOff) {
+      // use `-4` because we want to count 4 measures
+      state.noteToBeScheduled = pmod(-4 * state.counterpulse, state.pulse * state.counterpulse)
+      state.currentNote = pmod(-4 * state.counterpulse, state.pulse * state.counterpulse)
+      state.countOffNotes = 4 * state.counterpulse
+    }
 
     state.intervalID = setInterval(() => {
       scheduleNotes()
@@ -227,9 +241,9 @@ const start = () => {
     renderPlayBtn()
   } else {
     clearInterval(state.intervalID)
-    state.intervalID = undefined
+    state.intervalID = null
 
-    state.currentNote = undefined
+    state.currentNote = null
     state.scheduledNotes = []
 
     highlightCell()
@@ -280,14 +294,22 @@ const init = () => {
     })
   }
 
-  groupSubdivisionsElm.addEventListener('click', ()=> {
+  groupSubdivisionsElm.addEventListener('click', () => {
     state.groupSubdivisions = groupSubdivisionsElm.checked
     renderGrid()
   })
 
+  countOffElm.addEventListener('click', () => {
+    state.countOff = countOffElm.checked
+  })
 
   renderLabel()
   renderGrid()
   renderTempo()
 }
 init()
+
+// *********************************************************************************************************************
+// Utility
+// *********************************************************************************************************************
+const pmod = (a, m) => ((a % m) + m) % m
