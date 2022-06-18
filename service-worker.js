@@ -1,8 +1,11 @@
+const PRECACHE = 'precache-v0.2';
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-
-    caches.open("polyriddim-offline").then((cache) => {
-      return cache.addAll(['index.html', 'main.css', 'main.js'])
+    caches.open(PRECACHE).then((cache) => {
+      return cache
+        .addAll(['./', 'index.html', 'main.css', 'main.js'])
+        .then(self.skipWaiting())
     })
   )
 })
@@ -14,3 +17,15 @@ self.addEventListener('fetch', (event) => {
     })
   )
 })
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return cacheNames.filter(cacheName => cacheName !== PRECACHE);
+    }).then(cachesToDelete => {
+      return Promise.all(cachesToDelete.map(cacheToDelete => {
+        return caches.delete(cacheToDelete);
+      }));
+    }).then(() => self.clients.claim())
+  );
+});

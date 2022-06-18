@@ -28,9 +28,9 @@ const NOTE_OPTIONS = [NOTE_OPTION_PULSE, NOTE_OPTION_ALL]
 // State
 // *********************************************************************************************************************
 const state = {
-  pulse: 3,
-  counterpulse: 4,
-  bpm: 90,
+  pulse: 11,
+  counterpulse: 7,
+  bpm: 70,
 
   noteToBeScheduled: null, // next note to be scheduled, number in range [0, x*y)
   nextNoteTime: null, // time when next note is to be played
@@ -42,8 +42,8 @@ const state = {
   intervalID: null, // intervalID of setTimeout which schedules notes
 
   // Settings
-  noteOption: NOTE_OPTION_PULSE,
-  groupSubdivisions: false,
+  noteOption: NOTE_OPTION_ALL,
+  groupSubdivisions: true,
   countOff: true,
 }
 
@@ -134,7 +134,7 @@ const animateCells = () => {
 // Header
 // *********************************************************************************************************************
 const renderLabel = () => {
-  labelElm.textContent = `${state.pulse} vs ${state.counterpulse}`
+  labelElm.textContent = `${state.pulse} versus ${state.counterpulse}`
 }
 
 const renderSignatureControls = () => {
