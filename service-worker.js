@@ -1,4 +1,4 @@
-const PRECACHE = 'precache-v0.3';
+const PRECACHE = 'precache-v0.3.1';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
