@@ -106,13 +106,6 @@ h2 a {
     width: 80px;
     border-radius: 40px;
     font-size: 2em;
-}
-
-.play--play {
-    line-height: 80px;
-}
-
-.play--stop {
     line-height: 80px;
 }
 
@@ -147,6 +140,14 @@ h2 a {
 
 .settings > * + * {
     margin-top: 10px;
+}
+
+#tracking-pixel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 1px;
 }
 
 button {

@@ -1,10 +1,10 @@
-const PRECACHE = 'precache-v0.3.1';
+const PRECACHE = 'precache-v0.3.2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(PRECACHE).then((cache) => {
       return cache
-        .addAll(['./', 'index.html', 'main.css', 'main.js'])
+        .addAll(['index.html', 'main.css', 'main.js'])
         .then(self.skipWaiting())
     })
   )

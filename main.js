@@ -257,7 +257,7 @@ const renderTempo = () => {
 }
 
 const renderPlayBtn = () => {
-  playBtn.innerHTML = isRunning() ? '<span class="play--stop">&#x25FC;</span>' : '<span class="play--play">&#x25B6;</span>'
+  playBtn.innerHTML = isRunning() ? '<span>&#x25FC;</span>' : '<span>&#x25B6;</span>'
 }
 
 // *********************************************************************************************************************
