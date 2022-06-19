@@ -75,8 +75,9 @@ window.requestAnimFrame = (function () {
 // Grid
 // *********************************************************************************************************************
 const renderGrid = () => {
-  gridElm.style.gridTemplateRows = Array(state.pulse).fill("minmax(5px, 50px)").join(' ')
-  gridElm.style.gridTemplateColumns = Array(state.counterpulse).fill("minmax(5px, 50px)").join(' ')
+
+  gridElm.style.gridTemplateRows = `repeat(${state.pulse}, minmax(5px, min(50px, calc((100vh - 110px - (5px * ${state.pulse})) / ${state.pulse})))`
+  gridElm.style.gridTemplateColumns = `repeat(${state.counterpulse}, minmax(5px, 50px))`
 
   gridElm.textContent = ''
 
