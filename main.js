@@ -24,6 +24,9 @@ const NOTE_OPTION_PULSE = 'PULSE'
 const NOTE_OPTION_ALL = 'ALL'
 const NOTE_OPTIONS = [NOTE_OPTION_PULSE, NOTE_OPTION_ALL]
 
+const MAX_PULSE = 20
+const MIN_PULSE = 2
+
 // *********************************************************************************************************************
 // State
 // *********************************************************************************************************************
@@ -139,10 +142,10 @@ const renderLabel = () => {
 }
 
 const renderSignatureControls = () => {
-  incPulseBtn.disabled = state.pulse >= 11
-  incCounterpulseBtn.disabled = state.counterpulse >= 11
-  decPulseBtn.disabled = state.pulse <= 2
-  decCounterpulseBtn.disabled = state.counterpulse <= 2
+  incPulseBtn.disabled = state.pulse >= MAX_PULSE
+  incCounterpulseBtn.disabled = state.counterpulse >= MAX_PULSE
+  decPulseBtn.disabled = state.pulse <= MIN_PULSE
+  decCounterpulseBtn.disabled = state.counterpulse <= MIN_PULSE
 }
 
 // *********************************************************************************************************************
@@ -307,6 +310,7 @@ const init = () => {
   renderLabel()
   renderGrid()
   renderTempo()
+  renderSignatureControls()
 }
 init()
 
